@@ -70,6 +70,15 @@
                 </svg>
                 History
             </button>
+            <button class="tab-btn" data-tab="tetris">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="4" y="4" width="6" height="6"></rect>
+                    <rect x="10" y="4" width="6" height="6"></rect>
+                    <rect x="10" y="10" width="6" height="6"></rect>
+                    <rect x="10" y="16" width="6" height="6"></rect>
+                </svg>
+                Tetris
+            </button>
         </nav>
 
         <!-- Main Content -->
@@ -440,6 +449,132 @@
                     </div>
                 </div>
             </section>
+
+            <!-- Tetris Tab -->
+            <section id="tetris-tab" class="tab-content">
+                <div class="tetris-container">
+                    <div class="tetris-game-wrapper">
+                        <div class="tetris-sidebar tetris-sidebar-left">
+                            <div class="tetris-hold">
+                                <h3>Hold</h3>
+                                <canvas id="hold-canvas" width="100" height="100"></canvas>
+                            </div>
+                            <div class="tetris-stats">
+                                <div class="stat-item">
+                                    <span class="stat-label">Score</span>
+                                    <span class="stat-value" id="tetris-score">0</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">Level</span>
+                                    <span class="stat-value" id="tetris-level">1</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">Lines</span>
+                                    <span class="stat-value" id="tetris-lines">0</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="tetris-main">
+                            <canvas id="tetris-canvas" width="300" height="600"></canvas>
+                            <div id="tetris-overlay" class="tetris-overlay">
+                                <div class="overlay-content">
+                                    <h2 id="overlay-title">TETRIS</h2>
+                                    <p id="overlay-message">Press Start to Play</p>
+                                    <button id="tetris-start" class="btn btn-primary btn-large">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <polygon points="5,3 19,12 5,21"></polygon>
+                                        </svg>
+                                        Start Game
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="tetris-sidebar tetris-sidebar-right">
+                            <div class="tetris-next">
+                                <h3>Next</h3>
+                                <canvas id="next-canvas" width="100" height="300"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="tetris-controls">
+                        <div class="controls-row">
+                            <button id="tetris-pause" class="btn btn-secondary" disabled>
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="6" y="4" width="4" height="16"></rect>
+                                    <rect x="14" y="4" width="4" height="16"></rect>
+                                </svg>
+                                Pause
+                            </button>
+                            <button id="tetris-restart" class="btn btn-outline">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M23 4v6h-6"></path>
+                                    <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+                                </svg>
+                                Restart
+                            </button>
+                        </div>
+
+                        <!-- Mobile Controls -->
+                        <div class="mobile-controls">
+                            <div class="mobile-controls-row">
+                                <button class="mobile-btn" id="btn-rotate">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M23 4v6h-6"></path>
+                                        <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                            <div class="mobile-controls-row">
+                                <button class="mobile-btn" id="btn-left">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <polyline points="15,18 9,12 15,6"></polyline>
+                                    </svg>
+                                </button>
+                                <button class="mobile-btn" id="btn-down">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <polyline points="6,9 12,15 18,9"></polyline>
+                                    </svg>
+                                </button>
+                                <button class="mobile-btn" id="btn-right">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <polyline points="9,18 15,12 9,6"></polyline>
+                                    </svg>
+                                </button>
+                            </div>
+                            <div class="mobile-controls-row">
+                                <button class="mobile-btn mobile-btn-wide" id="btn-drop">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <polyline points="6,9 12,15 18,9"></polyline>
+                                        <polyline points="6,15 12,21 18,15"></polyline>
+                                    </svg>
+                                    Drop
+                                </button>
+                                <button class="mobile-btn" id="btn-hold">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <rect x="3" y="3" width="18" height="18" rx="2"></rect>
+                                        <path d="M9 9h6v6H9z"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="tetris-instructions">
+                        <h3>Controls</h3>
+                        <div class="instructions-grid">
+                            <div class="instruction"><kbd>←</kbd><kbd>→</kbd> Move</div>
+                            <div class="instruction"><kbd>↑</kbd> Rotate</div>
+                            <div class="instruction"><kbd>↓</kbd> Soft Drop</div>
+                            <div class="instruction"><kbd>Space</kbd> Hard Drop</div>
+                            <div class="instruction"><kbd>C</kbd> Hold</div>
+                            <div class="instruction"><kbd>P</kbd> Pause</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
         </main>
 
         <!-- Toast Notification -->
@@ -476,6 +611,7 @@
     <script src="js/scanner.js"></script>
     <script src="js/generator.js"></script>
     <script src="js/history.js"></script>
+    <script src="js/tetris.js"></script>
     <script src="js/app.js"></script>
 </body>
 </html>
