@@ -298,44 +298,95 @@ class QRGenerator {
             return;
         }
 
+        // Check if QRCode library is loaded
+        if (typeof QRCode === 'undefined') {
+            showToast('QR library not loaded. Please use a local server or check your internet connection.', 'error');
+            console.error('QRCode library not loaded. This may happen when opening the file directly. Try using a local server.');
+            return;
+        }
+
         const size = parseInt(this.qrSize.value);
         const fgColor = this.fgColor.value;
         const bgColor = this.bgColor.value;
         const errorCorrectionLevel = this.errorLevel.value;
 
+        // Map error correction levels
+        const errorLevelMap = { 'L': 1, 'M': 0, 'Q': 3, 'H': 2 };
+
         try {
             // Clear previous QR code
             this.qrOutput.innerHTML = '';
 
-            // Create canvas element
-            const canvas = document.createElement('canvas');
-            canvas.id = 'qr-canvas';
+            // Check which QRCode library is loaded and use appropriate API
+            if (typeof QRCode.toCanvas === 'function') {
+                // Node qrcode library (npm qrcode)
+                const canvas = document.createElement('canvas');
+                canvas.id = 'qr-canvas';
 
-            // Generate QR code
-            await QRCode.toCanvas(canvas, content, {
-                width: size,
-                margin: 2,
-                color: {
-                    dark: fgColor,
-                    light: bgColor
-                },
-                errorCorrectionLevel: errorCorrectionLevel
-            });
+                await QRCode.toCanvas(canvas, content, {
+                    width: size,
+                    margin: 2,
+                    color: {
+                        dark: fgColor,
+                        light: bgColor
+                    },
+                    errorCorrectionLevel: errorCorrectionLevel
+                });
 
-            // Add logo if present
-            if (this.logoImage) {
-                this.addLogoToCanvas(canvas);
+                // Add logo if present
+                if (this.logoImage) {
+                    this.addLogoToCanvas(canvas);
+                }
+
+                this.qrCanvas = canvas;
+                this.qrOutput.appendChild(canvas);
+            } else {
+                // qrcodejs library (davidshimjs)
+                const qrContainer = document.createElement('div');
+                qrContainer.id = 'qr-container';
+
+                // qrcodejs uses different error correction level values
+                const qr = new QRCode(qrContainer, {
+                    text: content,
+                    width: size,
+                    height: size,
+                    colorDark: fgColor,
+                    colorLight: bgColor,
+                    correctLevel: QRCode.CorrectLevel[errorCorrectionLevel] || QRCode.CorrectLevel.M
+                });
+
+                // Wait a bit for QR code to render
+                await new Promise(resolve => setTimeout(resolve, 100));
+
+                // Get the canvas from qrcodejs
+                const canvas = qrContainer.querySelector('canvas');
+                if (canvas) {
+                    canvas.id = 'qr-canvas';
+
+                    // Add logo if present
+                    if (this.logoImage) {
+                        this.addLogoToCanvas(canvas);
+                    }
+
+                    this.qrCanvas = canvas;
+                }
+
+                this.qrOutput.appendChild(qrContainer);
             }
 
-            this.qrCanvas = canvas;
-            this.qrOutput.appendChild(canvas);
             this.qrActions.classList.remove('hidden');
-
             showToast('QR code generated!', 'success');
 
         } catch (err) {
             console.error('Error generating QR code:', err);
-            showToast('Error generating QR code. Content may be too long.', 'error');
+            // Provide more specific error message
+            if (err.message && err.message.includes('too long')) {
+                showToast('Error: Content is too long for QR code.', 'error');
+            } else if (err.message) {
+                showToast(`Error: ${err.message}`, 'error');
+            } else {
+                showToast('Error generating QR code. Check browser console for details.', 'error');
+            }
         }
     }
 
@@ -390,16 +441,33 @@ class QRGenerator {
         }
 
         try {
-            const svg = await QRCode.toString(content, {
-                type: 'svg',
-                width: parseInt(this.qrSize.value),
-                margin: 2,
-                color: {
-                    dark: this.fgColor.value,
-                    light: this.bgColor.value
-                },
-                errorCorrectionLevel: this.errorLevel.value
-            });
+            let svg;
+
+            // Check which library is available
+            if (typeof QRCode.toString === 'function') {
+                // Node qrcode library supports direct SVG generation
+                svg = await QRCode.toString(content, {
+                    type: 'svg',
+                    width: parseInt(this.qrSize.value),
+                    margin: 2,
+                    color: {
+                        dark: this.fgColor.value,
+                        light: this.bgColor.value
+                    },
+                    errorCorrectionLevel: this.errorLevel.value
+                });
+            } else if (this.qrCanvas) {
+                // Fallback: Convert canvas to SVG
+                const size = this.qrCanvas.width;
+                const dataUrl = this.qrCanvas.toDataURL('image/png');
+                svg = `<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
+    <image width="${size}" height="${size}" xlink:href="${dataUrl}"/>
+</svg>`;
+            } else {
+                showToast('Please generate a QR code first', 'error');
+                return;
+            }
 
             const blob = new Blob([svg], { type: 'image/svg+xml' });
             const url = URL.createObjectURL(blob);

@@ -448,9 +448,29 @@
         </div>
     </div>
 
-    <!-- External Libraries -->
+    <!-- External Libraries with fallbacks -->
     <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script>
+        // Fallback: If QRCode not loaded from CDN, try alternate sources
+        if (typeof QRCode === 'undefined') {
+            document.write('<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"><\/script>');
+        }
+    </script>
+    <script>
+        // Check library status and show warning if needed
+        window.addEventListener('DOMContentLoaded', function() {
+            setTimeout(function() {
+                if (typeof QRCode === 'undefined') {
+                    console.warn('QRCode library failed to load. If opening from file://, please use a local web server.');
+                    var warning = document.createElement('div');
+                    warning.style.cssText = 'position:fixed;top:0;left:0;right:0;background:#ef4444;color:white;padding:12px;text-align:center;z-index:9999;font-size:14px;';
+                    warning.innerHTML = '<strong>Warning:</strong> QR code library failed to load. For full functionality, please serve this app using a local web server (e.g., <code>python -m http.server</code>).';
+                    document.body.insertBefore(warning, document.body.firstChild);
+                }
+            }, 1000);
+        });
+    </script>
 
     <!-- App Scripts -->
     <script src="js/scanner.js"></script>
